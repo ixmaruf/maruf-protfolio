@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Maruf Hasan - Web3 Ambassador & Community Strategist Portfolio">
+    <title>Maruf | Web3 Community Architect</title>
+    
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline';">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* --- LIGHT THEME VARIABLES --- */
+            --bg-color: #f3f4f6;
+            --glass-surface: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --primary-accent: #3b82f6;
+            --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+            --dock-bg: rgba(255, 255, 255, 0.8);
+            --dock-border: #ffffff;
+            --badge-bg: #dcfce7;
+            --badge-text: #166534;
+            --badge-border: #bbf7d0;
+            --contact-label-bg: #0f172a;
+            --contact-label-text: #ffffff;
+            --skill-item-bg: rgba(255,255,255,0.5);
+            
+            /* Aurora Colors (Light) */
+            --blob-1: #c084fc;
+            --blob-2: #60a5fa;
+            --blob-3: #f472b6;
+        }
+
+        [data-theme="dark"] {
+            /* --- DARK THEME VARIABLES --- */
+            --bg-color: #020617;
+            --glass-surface: rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --primary-accent: #60a5fa;
+            --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+            --dock-bg: rgba(15, 23, 42, 0.8);
+            --dock-border: rgba(255, 255, 255, 0.1);
+            --badge-bg: rgba(16, 185, 129, 0.15);
+            --badge-text: #34d399;
+            --badge-border: rgba(16, 185, 129, 0.3);
+            --contact-label-bg: #ffffff;
+            --contact-label-text: #020617;
+            --skill-item-bg: rgba(255,255,255,0.05);
+
+            /* Aurora Colors (Dark - Neon Glow) */
+            --blob-1: #7e22ce;
+            --blob-2: #2563eb;
+            --blob-3: #db2777;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* Improved tap highlight for mobile */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 140px;
+            /* Smooth theme transition */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- Optimized Aurora Background (GPU Accelerated) --- */
+        .aurora-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            /* Prevents painting issues on some browsers */
+            transform: translateZ(0); 
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.8;
+            will-change: transform; /* Tells browser to optimize */
+            animation: float 15s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: var(--blob-1); }
+        .blob-2 { bottom: 10%; right: -10%; width: 400px; height: 400px; background: var(--blob-2); animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: var(--blob-3); opacity: 0.6; animation-delay: -2s; }
+
+        @keyframes float {
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            100% { transform: translate3d(30px, 40px, 0) scale(1.1); }
+        }
+
+        /* --- Header & Toggle --- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 20px;
+            background: var(--glass-surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); /* Safari Fix */
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .header-inner {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--primary-accent); }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            border-radius: 20px;
+            border: 1px solid var(--badge-border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-dot { width: 8px; height: 8px; background: var(--badge-text); border-radius: 50%; box-shadow: 0 0 5px var(--badge-text); }
+        
+        @media (max-width: 400px) {
+            .status span { display: none; }
+        }
+
+        /* Theme Toggle Button */
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        .theme-btn:hover {
+            background: var(--glass-border);
+            transform: rotate(15deg);
+        }
+
+        /* --- Container --- */
+        .container {
+            max-width: 800px;
+            margin: 40px auto 0;
+            padding: 0 20px;
+        }
+
+        /* --- Glass Cards --- */
+        .card {
+            background: var(--glass-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px); /* Safari Fix */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-accent);
+        }
+
+        /* --- Hero --- */
+        .hero {
+            text-align: center;
+            padding: 50px 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .hero-title {
+            font-size: 18px;
+            color: var(--primary-accent);
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: var(--text-sub);
+            max-width: 550px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* --- Card Content --- */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .card-icon { font-size: 28px; }
+        .card-title { font-size: 20px; font-weight: 700; color: var(--text-main); }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .skill-item {
+            background: var(--skill-item-bg);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .skill-item h4 { font-size: 15px; margin-bottom: 5px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .skill-item p { font-size: 13px; color: var(--text-sub); }
+
+        /* --- Compact Info --- */
+        .compact-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--skill-item-bg);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        .info-label { font-weight: 600; color: var(--text-main); }
+        .info-val { font-size: 13px; background: var(--bg-color); padding: 4px 10px; border-radius: 6px; color: var(--text-sub); border: 1px solid var(--glass-border); }
+
+        /* --- Dock --- */
+        .dock-container {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2000;
+            pointer-events: none; /* Allows clicking through empty space */
+        }
+
+        .dock-container > * {
+            pointer-events: auto; /* Re-enable clicks on buttons */
+        }
+
+        .contact-label {
+            background: var(--contact-label-bg);
+            color: var(--contact-label-text);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            animation: bounce 2s infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .dock {
+            background: var(--dock-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 12px 20px;
+            border-radius: 24px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 1px solid var(--dock-border);
+        }
+
+        .dock-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            background: var(--skill-item-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid var(--glass-border);
+        }
+
+        .dock-icon:hover {
+            transform: scale(1.15) translateY(-5px);
+            background: var(--text-main);
+            color: var(--bg-color);
+        }
+
+        /* Hover colors */
+        .dock-icon.tw:hover { background: #000; color: #fff; }
+        .dock-icon.tg:hover { background: #26A5E4; color: #fff; }
+        .dock-icon.dc:hover { background: #5865F2; color: #fff; }
+        .dock-icon.em:hover { background: #ea4335; color: #fff; }
+        
+        [data-theme="dark"] .dock-icon.tw:hover { background: #fff; color: #000; }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 36px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .dock { padding: 10px 15px; gap: 15px; }
+            .dock-icon { width: 45px; height: 45px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;"> <div class="aurora-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">Maruf<span>.</span></div>
+            
+            <div class="header-actions">
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span>Open for Work</span>
+                </div>
+                
+                <button class="theme-btn" id="themeToggle" title="Switch Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div class="hero">
+            <h1>Maruf Hasan</h1>
+            <div class="hero-title">Web3 Ambassador & Community Architect</div>
+            <p>
+                I turn passive followers into active communities. Specializing in <strong>Twitter, Telegram, and Discord</strong> growth strategies with organic engagement and professional moderation.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fab fa-x-twitter card-icon" style="color: var(--text-main);"></i>
+                <div class="card-title">Twitter (X) Specialist</div>
+            </div>
+            <div class="grid-2">
+                <div class="skill-item">
+                    <h4><i class="fas fa-pen-nib" style="color: #8b5cf6"></i> Thread Writing</h4>
+                    <p>Creating viral, educational threads that drive narrative.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-bolt" style="color: #eab308"></i> Engagement</h4>
+                    <p>High-quality replies (no spam) to attract attention.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-rocket" style="color: #ef4444"></i> Raiding</h4>
+                    <p>Organizing community raids to boost visibility.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-handshake" style="color: #10b981"></i> Networking</h4>
+                    <p>Connecting with KOLs and Alpha groups.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fab fa-telegram card-icon" style="color: #26A5E4;"></i>
+                <div class="card-title">Telegram Management</div>
+            </div>
+            <div class="grid-2">
+                <div class="skill-item">
+                    <h4><i class="fas fa-robot" style="color: #26A5E4"></i> Bot Setup</h4>
+                    <p>Expert in Rose, Combot, SafeGuard setup & captcha.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-shield-alt" style="color: #f59e0b"></i> Security</h4>
+                    <p>Instant spam/scam removal and FUD handling.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-users" style="color: #6366f1"></i> Co-Admin Exp</h4>
+                    <p>Managed <strong>150k+ Member</strong> channel for 1 year.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-bullhorn" style="color: #ec4899"></i> Announcements</h4>
+                    <p>Writing pinned posts and daily updates.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fab fa-discord card-icon" style="color: #5865F2;"></i>
+                <div class="card-title">Discord Architecture</div>
+            </div>
+            <div class="grid-2">
+                <div class="skill-item">
+                    <h4><i class="fas fa-ticket-alt" style="color: #10b981"></i> Support</h4>
+                    <p>Managing ticket systems & onboarding flow.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-user-tag" style="color: #f43f5e"></i> Roles</h4>
+                    <p>Permission setup and Role-based access control.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-calendar-alt" style="color: #8b5cf6"></i> Events</h4>
+                    <p>Hosting AMAs, Game Nights, and Stage events.</p>
+                </div>
+                <div class="skill-item">
+                    <h4><i class="fas fa-chart-line" style="color: #3b82f6"></i> Activity</h4>
+                    <p>Maintaining chat health and leveling systems.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card" style="padding: 20px;">
+                <h4 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-graduation-cap" style="color: #3b82f6;"></i> Education
+                </h4>
+                <div class="compact-info">
+                    <span class="info-label">Degree</span>
+                    <span class="info-val">BBA Honors</span>
+                </div>
+                <div class="compact-info">
+                    <span class="info-label">Major</span>
+                    <span class="info-val">Management</span>
+                </div>
+                <div class="compact-info">
+                    <span class="info-label">Year</span>
+                    <span class="info-val">4th (Final Year)</span>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <h4 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-language" style="color: #ec4899;"></i> Languages
+                </h4>
+                <div class="compact-info">
+                    <span class="info-label">Bengali</span>
+                    <span class="info-val">Native</span>
+                </div>
+                <div class="compact-info">
+                    <span class="info-label">English</span>
+                    <span class="info-val">Professional</span>
+                </div>
+                <div class="compact-info">
+                    <span class="info-label">Hindi</span>
+                    <span class="info-val">Speaking</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="dock-container">
+        <div class="contact-label">
+            Connect With Me <i class="fas fa-arrow-down"></i>
+        </div>
+        <div class="dock">
+            <a href="https://x.com/maruf_ix" target="_blank" rel="noopener noreferrer" class="dock-icon tw">
+                <i class="fab fa-x-twitter"></i>
+            </a>
+            <a href="https://t.me/maruff_ix" target="_blank" rel="noopener noreferrer" class="dock-icon tg">
+                <i class="fab fa-telegram-plane"></i>
+            </a>
+            <a href="https://discord.com/users/792757747891961876" target="_blank" rel="noopener noreferrer" class="dock-icon dc">
+                <i class="fab fa-discord"></i>
+            </a>
+            <a href="mailto:marufhasan8009@gmail.com" class="dock-icon em">
+                <i class="fas fa-envelope"></i>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const icon = themeToggle.querySelector('i');
+        const html = document.documentElement;
+
+        // Check Local Storage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        // Toggle Function
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Disable Inspect Element (Ctrl+Shift+I) - Basic Protection
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123) {
+               return false;
+            }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+               return false;
+            }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) {
+               return false;
+            }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+               return false;
+            }
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+               return false;
+            }
+        }
+    </script>
+</body>
+</html>
