@@ -18,24 +18,24 @@
     <style>
         :root {
             /* --- BRAND COLORS --- */
-            --col-x: #000000; /* X Brand Color */
+            --col-x: #000000; 
             --col-telegram: #26A5E4;
             --col-discord: #5865F2;
             --col-content: #f43f5e;
             --col-graphics: #f97316;
             
-            /* --- SUPER VIBRANT ACCENTS --- */
+            /* --- VIBRANT ACCENTS --- */
             --blob-1: #a855f7; 
             --blob-2: #3b82f6; 
             --blob-3: #f43f5e; 
             
-            /* --- LIGHT THEME (Liquid Glass) --- */
+            /* --- LIGHT THEME --- */
             --bg-color: #f0f9ff;
             --text-main: #0f172a;
             --text-sub: #334155;
             --primary-accent: #2563eb;
             
-            /* iOS 18 LIQUID GLASS CORE */
+            /* GLASS CORE */
             --glass-surface: rgba(255, 255, 255, 0.22);
             --glass-border: rgba(255, 255, 255, 0.35);
             --glass-highlight: rgba(255, 255, 255, 0.45);
@@ -45,7 +45,7 @@
             
             --card-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 20px 50px rgba(0, 0, 0, 0.08);
             
-            /* STATUS COLORS */
+            /* STATUS */
             --status-green: #00e676;
             --badge-bg: rgba(0, 230, 118, 0.1);
             --badge-border: rgba(0, 230, 118, 0.3);
@@ -53,23 +53,25 @@
             
             --skill-item-bg: rgba(255,255,255,0.3);
             --contact-box-bg: rgba(255,255,255,0.5);
+            --contact-hover: rgba(255,255,255,0.8);
         }
 
         [data-theme="dark"] {
             --bg-color: #020617;
-            --text-main: #f1f5f9;
-            --text-sub: #94a3b8;
-            --primary-accent: #38bdf8;
+            /* FIXED: BRIGHTER TEXT FOR DARK MODE */
+            --text-main: #ffffff; 
+            --text-sub: #f1f5f9; 
+            --primary-accent: #60a5fa;
             
-            /* Dark Mode Liquid Glass */
+            /* DARK GLASS */
             --glass-surface: rgba(255, 255, 255, 0.06);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.10);
             
             --dock-bg: rgba(255, 255, 255, 0.08);
             --dock-border: rgba(255, 255, 255, 0.22);
             
-            --card-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 30px 60px rgba(0, 0, 0, 0.55);
+            --card-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.10), 0 30px 60px rgba(0, 0, 0, 0.6);
             
             --status-green: #00ff80;
             --badge-bg: rgba(0, 255, 128, 0.15);
@@ -77,9 +79,11 @@
             --badge-text: #d1fae5;
             
             --skill-item-bg: rgba(255,255,255,0.05);
-            --contact-box-bg: rgba(255,255,255,0.08);
+            --contact-box-bg: rgba(255,255,255,0.05);
+            --contact-hover: rgba(255,255,255,0.15);
+            
             --blob-1: #7c3aed; --blob-2: #00d4ff; --blob-3: #ff0055;
-            --col-x: #ffffff; /* White X logo in Dark Mode */
+            --col-x: #ffffff; 
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -92,18 +96,23 @@
             min-height: 100vh;
             padding-bottom: 140px;
             transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* --- Vivid Background --- */
+        /* --- PERFORMANCE OPTIMIZED BACKGROUND --- */
         .aurora-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            overflow: hidden; transform: translateZ(0); pointer-events: none;
+            overflow: hidden; 
+            transform: translate3d(0,0,0); 
+            pointer-events: none;
         }
         .blob {
             position: absolute; border-radius: 50%;
             filter: blur(80px); opacity: 0.6;
-            will-change: transform;
+            will-change: transform; 
+            transform: translate3d(0,0,0);
             animation: float 12s infinite alternate ease-in-out;
+            backface-visibility: hidden; 
         }
         .blob-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: var(--blob-1); }
         .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: var(--blob-2); animation-delay: -5s; }
@@ -119,20 +128,33 @@
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1000; padding: 12px 24px; width: 90%; max-width: 600px;
             border-radius: 50px;
-            
-            /* Glass Header */
             background: linear-gradient(180deg, var(--glass-highlight), rgba(255,255,255,0.02)), var(--glass-surface);
             backdrop-filter: blur(60px) saturate(180%);
             -webkit-backdrop-filter: blur(60px) saturate(180%);
             border: 1px solid var(--glass-border);
             box-shadow: var(--card-shadow);
-            
             display: flex; justify-content: center;
             transition: 0.3s ease;
         }
         .header-inner { width: 100%; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
-        .logo span { color: var(--primary-accent); }
+        
+        .logo { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center;}
+        
+        /* --- LOGO DOT ANIMATION --- */
+        .logo span { 
+            color: var(--primary-accent); 
+            display: inline-block;
+            margin-left: 2px;
+            border-radius: 50%;
+            /* Glowing Animation */
+            animation: dotGlow 1.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes dotGlow {
+            0% { opacity: 0.5; transform: scale(1); text-shadow: 0 0 0 transparent; }
+            100% { opacity: 1; transform: scale(1.4); text-shadow: 0 0 10px var(--primary-accent); }
+        }
+
         .header-actions { display: flex; align-items: center; gap: 10px; }
 
         /* --- Status --- */
@@ -142,11 +164,13 @@
             border-radius: 30px; border: 1px solid var(--badge-border);
             display: flex; align-items: center; gap: 8px;
             backdrop-filter: blur(5px);
+            white-space: nowrap; 
         }
         .status-dot {
             width: 8px; height: 8px; background: var(--status-green);
             border-radius: 50%; position: relative;
             box-shadow: 0 0 10px var(--status-green);
+            flex-shrink: 0;
         }
         .status-dot::after {
             content: ''; position: absolute; inset: -3px;
@@ -155,14 +179,27 @@
         }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
 
-        /* --- Theme Button --- */
+        /* --- Theme Button with FASTER Animation --- */
         .theme-btn {
             background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
             color: var(--text-main); width: 36px; height: 36px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-size: 16px; transition: 0.3s;
+            position: relative; overflow: hidden;
+            
+            /* FASTER ATTENTION LOOP (1.5s) */
+            animation: popAndShake 1.5s infinite ease-in-out;
         }
-        .theme-btn:hover { background: var(--glass-highlight); }
+        
+        @keyframes popAndShake {
+            0%, 80% { transform: scale(1) rotate(0deg); border-color: var(--glass-border); }
+            85% { transform: scale(1.15) rotate(-15deg); border-color: var(--primary-accent); box-shadow: 0 0 15px var(--glass-highlight); }
+            90% { transform: scale(1.15) rotate(15deg); }
+            95% { transform: scale(1.15) rotate(-15deg); }
+            100% { transform: scale(1) rotate(0deg); border-color: var(--glass-border); }
+        }
+
+        .theme-btn:hover { background: var(--glass-highlight); animation: none; transform: scale(1.1); }
         .rotate-icon { animation: spin 0.5s ease-in-out; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -181,7 +218,7 @@
             font-size: 14px; font-weight: 700; color: var(--text-main);
         }
 
-        /* --- iOS 18 LIQUID GLASS CARD --- */
+        /* --- Card Performance Optimization --- */
         .card {
             position: relative;
             background: linear-gradient(180deg, var(--glass-highlight), rgba(255,255,255,0.02)), var(--glass-surface);
@@ -194,11 +231,13 @@
             -webkit-backdrop-filter: blur(60px) saturate(180%);
             box-shadow: var(--card-shadow);
             
+            transform: translate3d(0,0,0);
+            will-change: transform, opacity;
+            
             transition: transform 0.35s ease, border-color 0.35s ease;
             opacity: 0; animation: fadeInUp 0.6s ease-out forwards;
         }
         
-        /* Apple-style Noise Texture */
         .card::after, .dock::after, .header::after {
             content: ""; position: absolute; inset: 0; border-radius: inherit;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
@@ -207,7 +246,7 @@
 
         .card:hover { transform: translateY(-6px) scale(1.01); border-color: var(--primary-accent); }
         
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translate3d(0, 30px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
         .card:nth-child(1) { animation-delay: 0.1s; } .card:nth-child(2) { animation-delay: 0.2s; } .card:nth-child(3) { animation-delay: 0.3s; }
 
         .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); }
@@ -224,9 +263,19 @@
         .skill-item h4 { font-size: 16px; margin-bottom: 8px; color: var(--text-main); display: flex; align-items: center; gap: 8px; font-weight: 800; }
         .skill-item p { font-size: 14px; color: var(--text-sub); line-height: 1.5; font-weight: 500; }
 
+        /* --- FIXED DESKTOP LIST ALIGNMENT --- */
         .feature-list { list-style: none; }
-        .feature-list li { margin-bottom: 10px; font-size: 14px; color: var(--text-sub); display: flex; align-items: start; gap: 10px; font-weight: 500; }
-        .feature-list li i { color: var(--primary-accent); margin-top: 4px; }
+        .feature-list li { 
+            margin-bottom: 12px; 
+            font-size: 14px; 
+            color: var(--text-sub); 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px; 
+            font-weight: 500; 
+            line-height: 1.6; 
+        }
+        .feature-list li i { color: var(--primary-accent); margin-top: 4px; flex-shrink: 0; }
 
         .about-text { font-size: 16px; color: var(--text-sub); line-height: 1.8; margin-bottom: 15px; font-weight: 500; }
         .highlight { color: var(--primary-accent); font-weight: 800; background: var(--badge-bg); padding: 0 5px; border-radius: 4px; }
@@ -239,12 +288,11 @@
         .info-label { color: var(--text-sub); font-size: 14px; }
         .info-val { color: var(--text-main); font-size: 14px; }
 
-        /* --- EXPERIENCE ITEM STYLING --- */
         .exp-item { margin-bottom: 15px; }
         .exp-role { font-size: 18px; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 4px; }
         .exp-meta { font-size: 13px; font-weight: 600; color: var(--primary-accent); display: inline-block; background: var(--badge-bg); padding: 4px 10px; border-radius: 8px; margin-bottom: 10px; }
         
-        /* --- CONTACT BOX STYLING --- */
+        /* --- CONTACT BOX --- */
         .contact-box { 
             display: flex; flex-direction: column; gap: 12px; 
             margin-top: 5px;
@@ -254,7 +302,11 @@
             background: var(--contact-box-bg);
             padding: 12px 16px; border-radius: 12px;
             border: 1px solid var(--glass-border);
+            text-decoration: none; 
+            transition: background 0.2s ease, transform 0.2s ease;
         }
+        .contact-row:hover { background: var(--contact-hover); transform: translateX(5px); }
+        
         .contact-icon-box {
             width: 40px; height: 40px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
@@ -313,8 +365,10 @@
         @media (max-width: 600px) { 
             h1 { font-size: 36px; } .grid-2 { grid-template-columns: 1fr; } 
             .dock { padding: 10px 20px; gap: 12px; } .dock-icon { width: 48px; height: 48px; font-size: 20px; }
-            .status span { display: none; }
             .header { width: 95%; }
+            
+            /* FIXED: Show "Available" on Mobile, hide extra text */
+            .desktop-text { display: none; }
         }
     </style>
 </head>
@@ -329,10 +383,11 @@
     <header class="header">
         <div class="header-inner">
             <div class="logo">Maruf<span>.</span></div>
+            
             <div class="header-actions">
                 <div class="status">
                     <div class="status-dot"></div>
-                    <span>Available for Web3 Projects</span>
+                    <span>Available <span class="desktop-text">for Web3 Projects</span></span>
                 </div>
                 <button class="theme-btn" id="themeToggle" title="Switch Theme" aria-label="Switch Theme">
                     <i class="fas fa-moon"></i>
@@ -435,7 +490,7 @@
             <div class="skill-item" style="width:100%; margin-bottom: 20px;">
                 <div class="exp-item">
                     <span class="exp-role">Community Lead & Content Manager</span>
-                    <span class="exp-meta">Telegram / YouTube • 2024 – 2025</span>
+                    <span class="exp-meta">Telegram / YouTube • 2024 – Present</span>
                 </div>
                 <ul class="feature-list">
                     <li><i class="fas fa-check"></i> Scaled and managed a community of <span class="highlight">170,000+ members</span>.</li>
@@ -497,7 +552,7 @@
                 <div class="card-title">Contact Details</div>
             </div>
             <div class="contact-box">
-                <div class="contact-row">
+                <a href="https://x.com/maruf_ix" target="_blank" class="contact-row">
                     <div class="contact-icon-box c-tw">
                         <i class="fab fa-x-twitter"></i>
                     </div>
@@ -505,9 +560,9 @@
                         <span class="contact-label-sm">X (Twitter)</span>
                         <span class="contact-value">@maruf_ix</span>
                     </div>
-                </div>
+                </a>
                 
-                <div class="contact-row">
+                <a href="https://t.me/maruff_ix" target="_blank" class="contact-row">
                     <div class="contact-icon-box c-tg">
                         <i class="fab fa-telegram-plane"></i>
                     </div>
@@ -515,9 +570,19 @@
                         <span class="contact-label-sm">Telegram</span>
                         <span class="contact-value">@maruff_ix</span>
                     </div>
-                </div>
+                </a>
 
-                <div class="contact-row">
+                <a href="https://discord.com/users/792757747891961876" target="_blank" class="contact-row">
+                    <div class="contact-icon-box c-dc">
+                        <i class="fab fa-discord"></i>
+                    </div>
+                    <div class="contact-details">
+                        <span class="contact-label-sm">Discord</span>
+                        <span class="contact-value">maruf_ix</span>
+                    </div>
+                </a>
+
+                <a href="mailto:marufhasan8009@gmail.com" class="contact-row">
                     <div class="contact-icon-box c-em">
                         <i class="fas fa-envelope"></i>
                     </div>
@@ -525,7 +590,7 @@
                         <span class="contact-label-sm">Email</span>
                         <span class="contact-value">marufhasan8009@gmail.com</span>
                     </div>
-                </div>
+                </a>
             </div>
         </section>
 
