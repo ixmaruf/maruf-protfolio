@@ -18,6 +18,7 @@
     <style>
         :root {
             /* --- BRAND COLORS --- */
+            /* Fixed: X is always Black background to ensure White icon is visible */
             --col-x: #000000; 
             --col-telegram: #26A5E4;
             --col-discord: #5865F2;
@@ -89,12 +90,13 @@
             --input-bg: rgba(15, 23, 42, 0.5);
             --input-border: rgba(255, 255, 255, 0.15);
             
-            /* Option Background for Dark Mode (Fixes invisibility) */
+            /* Option Background for Dark Mode */
             --option-bg: #1e293b;
             --option-text: #ffffff;
             
             --blob-1: #7c3aed; --blob-2: #00d4ff; --blob-3: #ff0055;
-            --col-x: #ffffff;
+            
+            /* REMOVED --col-x override so X stays black in dark mode for visibility */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -322,14 +324,11 @@
             font-weight: 500;
             transition: all 0.2s ease;
             backdrop-filter: blur(5px);
-            /* Remove Default Browser Styles for modern look */
-            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            appearance: none; -webkit-appearance: none;
         }
         
-        /* Custom Select Styling to fix Dark Mode & Look */
+        /* Custom Select Styling */
         .select-wrapper { position: relative; }
-        
-        /* Custom Arrow */
         .select-wrapper::after {
             content: '\f107'; /* FontAwesome Angle Down */
             font-family: 'Font Awesome 6 Free'; font-weight: 900;
@@ -338,7 +337,7 @@
         }
         .select-wrapper:hover::after { color: var(--primary-accent); }
 
-        /* Specific Styling for Options to fix Dark Mode Invisible Text */
+        /* Fix Dark Mode Option Visibility */
         select option {
             background-color: var(--option-bg);
             color: var(--option-text);
