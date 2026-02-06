@@ -35,7 +35,7 @@
             --text-sub: #334155;
             --primary-accent: #2563eb;
             
-            /* --- FIXED GLASS CORE (High Visibility) --- */
+            /* --- FIXED GLASS CORE --- */
             --glass-surface: rgba(255, 255, 255, 0.70); 
             --glass-border: rgba(255, 255, 255, 0.8); 
             --glass-highlight: rgba(255, 255, 255, 0.9);
@@ -43,7 +43,6 @@
             --dock-bg: rgba(255, 255, 255, 0.5);
             --dock-border: rgba(255, 255, 255, 0.8);
             
-            /* 3D Shadow Effect */
             --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             
             /* STATUS */
@@ -57,6 +56,10 @@
             --contact-hover: rgba(255,255,255,0.95);
             --input-bg: rgba(255, 255, 255, 0.7);
             --input-border: rgba(203, 213, 225, 0.8);
+            
+            /* Option Background for Light Mode */
+            --option-bg: #ffffff;
+            --option-text: #0f172a;
         }
 
         [data-theme="dark"] {
@@ -85,6 +88,10 @@
             --contact-hover: rgba(255,255,255,0.1);
             --input-bg: rgba(15, 23, 42, 0.5);
             --input-border: rgba(255, 255, 255, 0.15);
+            
+            /* Option Background for Dark Mode (Fixes invisibility) */
+            --option-bg: #1e293b;
+            --option-text: #ffffff;
             
             --blob-1: #7c3aed; --blob-2: #00d4ff; --blob-3: #ff0055;
             --col-x: #ffffff;
@@ -243,7 +250,7 @@
         .card:hover { 
             transform: translateY(-6px) scale(1.01) translate3d(0,0,0); 
             border-color: var(--primary-accent); 
-            box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.15); /* Blue glow on hover */
+            box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.15); 
         }
         
         .card::after {
@@ -315,11 +322,14 @@
             font-weight: 500;
             transition: all 0.2s ease;
             backdrop-filter: blur(5px);
-            appearance: none; -webkit-appearance: none;
+            /* Remove Default Browser Styles for modern look */
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
         }
         
-        /* Custom Select Arrow */
+        /* Custom Select Styling to fix Dark Mode & Look */
         .select-wrapper { position: relative; }
+        
+        /* Custom Arrow */
         .select-wrapper::after {
             content: '\f107'; /* FontAwesome Angle Down */
             font-family: 'Font Awesome 6 Free'; font-weight: 900;
@@ -327,6 +337,13 @@
             color: var(--text-sub); pointer-events: none; transition: 0.3s;
         }
         .select-wrapper:hover::after { color: var(--primary-accent); }
+
+        /* Specific Styling for Options to fix Dark Mode Invisible Text */
+        select option {
+            background-color: var(--option-bg);
+            color: var(--option-text);
+            padding: 10px;
+        }
 
         .form-input::placeholder, .form-textarea::placeholder { color: var(--text-sub); opacity: 0.6; }
         
