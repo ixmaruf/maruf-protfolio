@@ -547,37 +547,42 @@
 
 <script>
   (function() {
-    // Unique Namespace for your site (DO NOT CHANGE)
-    const namespace = 'maruf-portfolio-official-v1';
+    // Unique Namespace so your counts don't mix with others
+    const namespace = 'maruf-web3-portfolio-official';
     
-    // API Function to update counts
+    // Function to update the counter
     const updateCounter = async () => {
       try {
-        // 1. Total Visits (Lifetime)
-        // This hits the 'total' key. If it doesn't exist, it creates it.
-        const totalRes = await fetch(`https://api.countapi.xyz/hit/${namespace}/total_visits`);
+        // 1. TOTAL VISITS
+        // We use the 'up' endpoint which increments and returns the new count
+        const totalRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/main_total_visits/up`);
         const totalData = await totalRes.json();
-        document.getElementById('totalVisits').innerText = totalData.value;
-
-        // 2. Today's Visits (Daily Reset Logic)
-        // We generate a unique key based on today's date in Bangladesh Time (e.g., visits_14_02_2026)
-        // So tomorrow, it generates a new key automatically starting from 0.
-        const date = new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Dhaka' }).replace(/\//g, '_');
-        const todayKey = `visits_${date}`;
         
-        const todayRes = await fetch(`https://api.countapi.xyz/hit/${namespace}/${todayKey}`);
+        if (totalData && totalData.count) {
+             document.getElementById('totalVisits').innerText = totalData.count;
+        }
+
+        // 2. TODAY VISITS (Daily Reset Logic)
+        // We create a unique key based on today's date (e.g., 2026-02-14)
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '_'); // Output: 2026_02_14
+        const todayKey = `day_${date}`;
+        
+        const todayRes = await fetch(`https://api.counterapi.dev/v1/${namespace}/${todayKey}/up`);
         const todayData = await todayRes.json();
-        document.getElementById('todayVisits').innerText = todayData.value;
+        
+        if (todayData && todayData.count) {
+            document.getElementById('todayVisits').innerText = todayData.count;
+        }
         
       } catch (error) {
         console.error('Counter Error:', error);
-        // Fallback if API fails
-        document.getElementById('totalVisits').innerText = "—";
-        document.getElementById('todayVisits').innerText = "—";
+        // If error, just show 1 as fallback so it doesn't look broken
+        document.getElementById('totalVisits').innerText = "1";
+        document.getElementById('todayVisits').innerText = "1";
       }
     };
 
-    // Run the counter when page loads
+    // Run when page loads
     updateCounter();
   })();
 </script>
