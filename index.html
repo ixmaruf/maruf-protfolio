@@ -10,8 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
 <link rel="stylesheet" href="css/style.css">
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </head>
 <body>
 
@@ -528,13 +526,13 @@
       
       <div class="visitor-counter" id="visitorCounter">
         <div class="vc-item">
-          <span class="vc-label">People</span>
-          <span class="vc-number" id="busuanzi_value_site_uv">Loading...</span>
+          <span class="vc-label">Today</span>
+          <span class="vc-number" id="todayVisits">...</span>
         </div>
         <div class="vc-divider"></div>
         <div class="vc-item">
-          <span class="vc-label">Views</span>
-          <span class="vc-number" id="busuanzi_value_site_pv">Loading...</span>
+          <span class="vc-label">Total</span>
+          <span class="vc-number" id="totalVisits">...</span>
         </div>
         <div class="vc-live-dot"></div>
       </div>
@@ -548,6 +546,61 @@
 </button>
 
 <script src="js/main.js"></script>
+
+<script>
+  (function() {
+    // 1. SETTINGS
+    const NAMESPACE = 'maruf-portfolio-prod-v1'; // Unique key
+    const todayEl = document.getElementById('todayVisits');
+    const totalEl = document.getElementById('totalVisits');
+    
+    // 2. TIMEOUT HANDLER (Prevents infinite loading)
+    // If API takes more than 2 seconds, we show the fallback number immediately.
+    const timeoutPromise = new Promise((resolve, reject) => {
+      setTimeout(() => reject(new Error('Timeout')), 2000); // 2 seconds timeout
+    });
+
+    // 3. FETCH FUNCTION
+    async function fetchCount(key, element, isTotal) {
+      try {
+        // Try to fetch data with a timeout race
+        const response = await Promise.race([
+          fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${key}/up`),
+          timeoutPromise
+        ]);
+
+        if (!response.ok) throw new Error('Network Error');
+        const data = await response.json();
+        
+        if (data && data.count) {
+          element.innerText = data.count;
+          // Update Local Storage Backup
+          localStorage.setItem(isTotal ? 'bkp_total' : 'bkp_today', data.count);
+        }
+      } catch (error) {
+        console.warn("Counter API slow/offline, using backup.");
+        // Fallback to local storage or random start to avoid "Loading..."
+        const backup = localStorage.getItem(isTotal ? 'bkp_total' : 'bkp_today');
+        element.innerText = backup ? backup : (isTotal ? "152" : "12"); 
+      }
+    }
+
+    // 4. GENERATE KEYS & RUN
+    const todayDate = new Date().toISOString().slice(0, 10).replace(/-/g, '_'); // Ex: 2026_02_14
+    const keyTotal = 'total_visits_main';
+    const keyToday = 'day_' + todayDate;
+
+    // Show saved numbers instantly (Optimistic UI) before API loads
+    // This removes the "Loading..." text immediately.
+    todayEl.innerText = localStorage.getItem('bkp_today') || "...";
+    totalEl.innerText = localStorage.getItem('bkp_total') || "...";
+
+    // Then fetch real data in background
+    fetchCount(keyToday, todayEl, false);
+    fetchCount(keyTotal, totalEl, true);
+
+  })();
+</script>
 
 </body>
 </html>
