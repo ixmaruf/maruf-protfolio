@@ -499,7 +499,7 @@
 
 <script>
   (function() {
-    // 1. UNIQUE NAMESPACE
+    // 1. UNIQUE NAMESPACE (Keep this exact one for consistency)
     const NAMESPACE = 'maruf-hasan-portfolio-global-v1';
     
     // 2. DOM ELEMENTS
@@ -509,11 +509,9 @@
     // 3. API URL
     const API_URL = 'https://api.counterapi.dev/v1';
 
-    // 4. GENERATE DATE KEY BASED ON DHAKA TIME (GMT+6)
-    // This ensures every user in the world generates the SAME key for "Today".
+    // 4. GENERATE DHAKA DATE KEY
     function getDhakaDateKey() {
       const now = new Date();
-      // Force locale to 'en-GB' and timezone to 'Asia/Dhaka'
       const options = { timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit' };
       const formatter = new Intl.DateTimeFormat('en-GB', options);
       const parts = formatter.formatToParts(now);
@@ -522,16 +520,18 @@
       const month = parts.find(p => p.type === 'month').value;
       const year = parts.find(p => p.type === 'year').value;
       
-      // Returns: "date_2026_02_14"
       return `date_${year}_${month}_${day}`;
     }
 
     const todayKey = getDhakaDateKey();
     const totalKey = 'total_global_visits';
 
-    // 5. FETCH FUNCTION
+    // 5. FETCH FUNCTION WITH CACHE BUSTING
+    // Adding `?t=${Date.now()}` forces the browser to fetch NEW data instantly
     function fetchCount(key, element) {
-      fetch(`${API_URL}/${NAMESPACE}/${key}/up`)
+      const url = `${API_URL}/${NAMESPACE}/${key}/up?t=${Date.now()}`;
+      
+      fetch(url)
         .then(res => {
           if (!res.ok) throw new Error('API Error');
           return res.json();
@@ -542,8 +542,8 @@
           }
         })
         .catch(err => {
-          console.error("Counter Error:", err);
-          // If error, keep the hardcoded HTML values (12 and 150) as fallback
+          console.error("Counter Error (Adblock/Network):", err);
+          // Only falls back to HTML default if blocked
         });
     }
 
