@@ -477,12 +477,12 @@
       <div class="visitor-counter" id="visitorCounter" style="display: flex !important;">
         <div class="vc-item">
           <span class="vc-label">Today</span>
-          <span class="vc-number" id="busuanzi_value_page_pv">1</span>
+          <span class="vc-number" id="todayVisits">12</span>
         </div>
         <div class="vc-divider"></div>
         <div class="vc-item">
           <span class="vc-label">Total</span>
-          <span class="vc-number" id="busuanzi_value_site_pv">1</span>
+          <span class="vc-number" id="totalVisits">150</span>
         </div>
         <div class="vc-live-dot"></div>
       </div>
@@ -498,31 +498,60 @@
 <script src="js/main.js"></script>
 
 <script>
-    // 1. Generate a unique URL path based on TODAY'S DATE.
-    // Busuanzi tracks "page_pv" based on the URL.
-    // If we change the URL dynamically to include the date, Busuanzi will think 
-    // it's a "New Page" every day and start counting from 0 for "page_pv".
-    // "site_pv" (Total) will remain global for the domain.
+  (function() {
+    // 1. UNIQUE NAMESPACE
+    const NAMESPACE = 'maruf-hasan-portfolio-global-v1';
     
-    var today = new Date();
-    var dateString = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-    
-    // We modify the history state so Busuanzi sees the fake URL with date
-    var fakeUrl = window.location.pathname + "?date=" + dateString;
-    history.replaceState(null, null, fakeUrl);
-</script>
+    // 2. DOM ELEMENTS
+    const todayEl = document.getElementById('todayVisits');
+    const totalEl = document.getElementById('totalVisits');
 
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    // 3. API URL
+    const API_URL = 'https://api.counterapi.dev/v1';
 
-<script>
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      var todayEl = document.getElementById('busuanzi_value_page_pv');
-      var totalEl = document.getElementById('busuanzi_value_site_pv');
-      if(todayEl.innerText == "" || todayEl.innerText == "...") todayEl.innerText = "12";
-      if(totalEl.innerText == "" || totalEl.innerText == "...") totalEl.innerText = "158";
-    }, 3000);
-  });
+    // 4. GENERATE DATE KEY BASED ON DHAKA TIME (GMT+6)
+    // This ensures every user in the world generates the SAME key for "Today".
+    function getDhakaDateKey() {
+      const now = new Date();
+      // Force locale to 'en-GB' and timezone to 'Asia/Dhaka'
+      const options = { timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit' };
+      const formatter = new Intl.DateTimeFormat('en-GB', options);
+      const parts = formatter.formatToParts(now);
+      
+      const day = parts.find(p => p.type === 'day').value;
+      const month = parts.find(p => p.type === 'month').value;
+      const year = parts.find(p => p.type === 'year').value;
+      
+      // Returns: "date_2026_02_14"
+      return `date_${year}_${month}_${day}`;
+    }
+
+    const todayKey = getDhakaDateKey();
+    const totalKey = 'total_global_visits';
+
+    // 5. FETCH FUNCTION
+    function fetchCount(key, element) {
+      fetch(`${API_URL}/${NAMESPACE}/${key}/up`)
+        .then(res => {
+          if (!res.ok) throw new Error('API Error');
+          return res.json();
+        })
+        .then(data => {
+          if(data && data.count) {
+            element.innerText = data.count;
+          }
+        })
+        .catch(err => {
+          console.error("Counter Error:", err);
+          // If error, keep the hardcoded HTML values (12 and 150) as fallback
+        });
+    }
+
+    // 6. EXECUTE
+    fetchCount(todayKey, todayEl);
+    fetchCount(totalKey, totalEl);
+
+  })();
 </script>
 
 </body>
