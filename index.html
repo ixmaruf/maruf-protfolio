@@ -497,39 +497,40 @@
 
 <script src="js/main.js"></script>
 
-<!-- Firebase SDK — Google's official library for atomic transactions -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-
 <script>
 /**
- * ═══════════════════════════════════════════════════════════
- * VISITOR COUNTER — Firebase SDK Transaction Method
- * ═══════════════════════════════════════════════════════════
+ * ═══════════════════════════════════════════════════════════════
+ * VISITOR COUNTER v6.0 — Firebase REST API (Bulletproof Edition)
+ * ═══════════════════════════════════════════════════════════════
  * 
- * ✅ Uses Firebase Realtime Database SDK (official Google library)
- * ✅ transaction() = 100% atomic, no race conditions
+ * ✅ Uses Firebase Realtime Database REST API (no SDK needed)
  * ✅ Works on GitHub Pages, Netlify, Vercel, any static host
- * ✅ 100+ simultaneous devices handled perfectly
- * ✅ Every page load/refresh = +1 count
+ * ✅ Simple read → increment → write (no ETag, no SDK, no complexity)
+ * ✅ 3-layer fallback: Firebase → counterapi.dev → localStorage
+ * ✅ Instant display from cache, then updates from server
  * ✅ "Today" resets at midnight Dhaka time (UTC+6)
- * ✅ "Total" never resets — permanent counter
- * ✅ Instant display from cache, then updates from Firebase
- * ✅ Offline fallback via localStorage
- * ═══════════════════════════════════════════════════════════
+ * ✅ "Total" never resets — accumulates forever
+ * ✅ Every page load/refresh = +1 count
+ * ✅ Wrapped in try-catch — even if main.js crashes, this still runs
+ * ═══════════════════════════════════════════════════════════════
  */
 (function() {
   'use strict';
 
-  // ── Firebase Configuration ──
-  var FIREBASE_DB_URL = 'https://maruf-42ebb-default-rtdb.asia-southeast1.firebasedatabase.app';
+  /* ─── Configuration ─── */
+  var FIREBASE_URL = 'https://maruf-42ebb-default-rtdb.asia-southeast1.firebasedatabase.app';
+  var COUNTER_API_NS = 'marufhasanportfolio2026';
+  var CACHE_KEY = 'mh_vc_v6';
 
-  // ── DOM Elements ──
-  var todayEl = document.getElementById('todayVisits');
-  var totalEl = document.getElementById('totalVisits');
+  /* ─── Elements ─── */
+  var todayEl, totalEl;
+  try {
+    todayEl = document.getElementById('todayVisits');
+    totalEl = document.getElementById('totalVisits');
+  } catch(e) { return; }
   if (!todayEl || !totalEl) return;
 
-  // ── Get Dhaka timezone date (YYYY-MM-DD) ──
+  /* ─── Get Dhaka Date (UTC+6) ─── */
   function getDhakaDate() {
     try {
       return new Intl.DateTimeFormat('en-CA', {
@@ -545,12 +546,9 @@
   var todayDate = getDhakaDate();
   var dailyKey = todayDate.replace(/-/g, '');
 
-  // ══════════════════════════════════════════════
-  // STEP 1: Show cached values INSTANTLY (no loading)
-  // ══════════════════════════════════════════════
+  /* ─── Show cached values INSTANTLY ─── */
   var cache = {};
-  try { cache = JSON.parse(localStorage.getItem('mh_vc_fb') || '{}'); } catch (e) { cache = {}; }
-  
+  try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e) { cache = {}; }
   if (cache.total && cache.total > 0) {
     totalEl.textContent = cache.total;
   }
@@ -560,96 +558,124 @@
     todayEl.textContent = '0';
   }
 
-  // ══════════════════════════════════════════════
-  // STEP 2: Initialize Firebase SDK
-  // ══════════════════════════════════════════════
-  try {
-    // Check if Firebase is already initialized
-    if (!firebase.apps.length) {
-      firebase.initializeApp({ databaseURL: FIREBASE_DB_URL });
-    }
-    var db = firebase.database();
-  } catch (initError) {
-    // Firebase SDK failed to load — stay with cached values
-    return;
+  /* ─── Save to cache ─── */
+  function saveCache(total, today) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        total: total, today: today, date: todayDate
+      }));
+    } catch(e) {}
   }
 
-  // ══════════════════════════════════════════════
-  // STEP 3: Atomic increment using transaction()
-  // ══════════════════════════════════════════════
-  // transaction() is THE OFFICIAL way to safely increment
-  // a value when multiple clients write simultaneously.
-  // Firebase handles all locking and retry logic internally.
-  
-  function atomicIncrement(path) {
+  /* ─── Fetch with timeout ─── */
+  function timedFetch(url, opts, ms) {
+    ms = ms || 6000;
     return new Promise(function(resolve, reject) {
-      db.ref(path).transaction(
-        function(currentValue) {
-          // This function may be called multiple times if there's contention.
-          // Firebase SDK handles retries automatically.
-          return (currentValue || 0) + 1;
-        },
-        function(error, committed, snapshot) {
-          if (error) {
-            reject(error);
-          } else if (!committed) {
-            reject(new Error('Transaction aborted'));
-          } else {
-            resolve(snapshot.val());
-          }
-        },
-        false // Don't apply locally before server confirms
-      );
+      var done = false;
+      var timer = setTimeout(function() {
+        if (!done) { done = true; reject(new Error('timeout')); }
+      }, ms);
+      fetch(url, opts || {}).then(function(r) {
+        if (!done) { done = true; clearTimeout(timer); resolve(r); }
+      }).catch(function(e) {
+        if (!done) { done = true; clearTimeout(timer); reject(e); }
+      });
     });
   }
 
-  // ══════════════════════════════════════════════
-  // STEP 4: Increment both counters simultaneously
-  // ══════════════════════════════════════════════
-  var totalPromise = atomicIncrement('visitors/total');
-  var dailyPromise = atomicIncrement('visitors/daily/' + dailyKey);
+  /* ═══════════════════════════════════════════
+     LAYER 1: Firebase Realtime Database REST API
+     Simple approach: GET value → add 1 → PUT value
+     ═══════════════════════════════════════════ */
+  function firebaseIncrement(path) {
+    var fullUrl = FIREBASE_URL + path + '.json';
+    return timedFetch(fullUrl)
+      .then(function(r) {
+        if (!r.ok) throw new Error('read-' + r.status);
+        return r.json();
+      })
+      .then(function(currentVal) {
+        var newVal = (typeof currentVal === 'number' ? currentVal : 0) + 1;
+        return timedFetch(fullUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newVal)
+        });
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('write-' + r.status);
+        return r.json();
+      });
+  }
 
-  Promise.all([totalPromise, dailyPromise])
-    .then(function(results) {
-      var newTotal = results[0];
-      var newDaily = results[1];
+  function tryFirebase() {
+    return Promise.all([
+      firebaseIncrement('/visitors/total'),
+      firebaseIncrement('/visitors/daily/' + dailyKey)
+    ]).then(function(results) {
+      return { total: results[0], today: results[1], source: 'firebase' };
+    });
+  }
 
-      // Update display
-      if (typeof newTotal === 'number' && newTotal > 0) {
-        totalEl.textContent = newTotal;
-      }
-      if (typeof newDaily === 'number' && newDaily > 0) {
-        todayEl.textContent = newDaily;
-      }
+  /* ═══════════════════════════════════════════
+     LAYER 2: counterapi.dev (free, no signup)
+     ═══════════════════════════════════════════ */
+  function counterApiIncrement(key) {
+    return timedFetch('https://api.counterapi.dev/v1/' + COUNTER_API_NS + '/' + key + '/up')
+      .then(function(r) {
+        if (!r.ok) throw new Error('counterapi-' + r.status);
+        return r.json();
+      })
+      .then(function(d) { return d.count; });
+  }
 
-      // Save to cache for instant display on next visit
-      try {
-        localStorage.setItem('mh_vc_fb', JSON.stringify({
-          total: newTotal,
-          today: newDaily,
-          date: todayDate
-        }));
-      } catch (e) {}
+  function tryCounterApi() {
+    return Promise.all([
+      counterApiIncrement('alltime'),
+      counterApiIncrement('day' + dailyKey)
+    ]).then(function(results) {
+      return { total: results[0], today: results[1], source: 'counterapi' };
+    });
+  }
+
+  /* ═══════════════════════════════════════════
+     LAYER 3: localStorage only (last resort)
+     ═══════════════════════════════════════════ */
+  function tryLocalOnly() {
+    var data = {};
+    try { data = JSON.parse(localStorage.getItem(CACHE_KEY + '_local') || '{}'); } catch(e) { data = {}; }
+    if (data.date !== todayDate) { data.date = todayDate; data.today = 0; }
+    data.today = (data.today || 0) + 1;
+    data.total = (data.total || 0) + 1;
+    try { localStorage.setItem(CACHE_KEY + '_local', JSON.stringify(data)); } catch(e) {}
+    return Promise.resolve({ total: data.total, today: data.today, source: 'local' });
+  }
+
+  /* ═══════════════════════════════════════════
+     EXECUTE: Try Layer 1 → Layer 2 → Layer 3
+     ═══════════════════════════════════════════ */
+  function updateDisplay(result) {
+    if (result.total && result.total > 0) totalEl.textContent = result.total;
+    if (result.today && result.today > 0) todayEl.textContent = result.today;
+    saveCache(result.total, result.today);
+  }
+
+  tryFirebase()
+    .then(function(result) {
+      updateDisplay(result);
     })
     .catch(function() {
-      // Firebase failed — cached values already shown
-      // Increment local cache as best-effort fallback
-      var fallback = {};
-      try { fallback = JSON.parse(localStorage.getItem('mh_vc_fb') || '{}'); } catch (e) { fallback = {}; }
-      
-      var localTotal = (fallback.total || 0) + 1;
-      var localToday = (fallback.date === todayDate) ? (fallback.today || 0) + 1 : 1;
-      
-      totalEl.textContent = localTotal;
-      todayEl.textContent = localToday;
-      
-      try {
-        localStorage.setItem('mh_vc_fb', JSON.stringify({
-          total: localTotal,
-          today: localToday,
-          date: todayDate
-        }));
-      } catch (e) {}
+      /* Firebase failed → try counterapi.dev */
+      tryCounterApi()
+        .then(function(result) {
+          updateDisplay(result);
+        })
+        .catch(function() {
+          /* Both failed → use localStorage */
+          tryLocalOnly().then(function(result) {
+            updateDisplay(result);
+          });
+        });
     });
 
 })();
